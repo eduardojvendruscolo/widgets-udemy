@@ -1,26 +1,47 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React, { useState } from "react";
+import Accordion from "./components/Accordion";
+import { useQuery } from "react-query";
+import Search from "./components/Search";
 
-function App() {
+const App = () => {
+  const fetchItems = () => {
+    return fetch("http://jsonplaceholder.typicode.com/posts").then((data) => {
+      return data.json();
+    });
+  };
+
+  const { data } = useQuery("itens-accordion", fetchItems, {
+    initialData: [],
+    initialStale: true,
+  });
+
+  const [activeIndex, setActiveIndex] = useState(null);
+
+  const onTitleClick = (index) => {
+    setActiveIndex(index);
+  };
+
+  const renderedItems = data.map((item, index) => {
+    const active = index === activeIndex ? "active" : "";
+
+    return (
+      <React.Fragment key={item.id}>
+        <div className={`title  ${active}`} onClick={() => onTitleClick(index)}>
+          <i className="dropdown icon"></i>
+          {item.title}
+        </div>
+        <div className={`content ${active}`}>
+          <p>{item.content}</p>
+        </div>
+      </React.Fragment>
+    );
+  });
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div className="ui styled accordion">
+      <Search />
     </div>
   );
-}
+};
 
 export default App;
